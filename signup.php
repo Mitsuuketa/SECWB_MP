@@ -61,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 } else {
                     // Ensure the upload directory exists, create it if it doesn't
                     if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0777, true); // Create directory with full permissions
+                        mkdir($uploadDir, 0755, true); // Create directory with  permissions
                     }
 
                     // Generate a unique filename to prevent conflicts
