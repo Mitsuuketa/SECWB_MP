@@ -40,7 +40,7 @@ CREATE TABLE `combo_meals` (
   `discount_percentage` decimal(5,2) NOT NULL,
   `category` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `quantity` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `combo_meals`
@@ -51,7 +51,7 @@ INSERT INTO `combo_meals` (`id`, `name`, `description`, `main_dish`, `side_dish`
 (2, 'Mediterranean Wedges Bliss Combo', 'Savor the Mediterranean taste with our Italian Grilled Bagel, accompanied by Steamed Vegetables, and served with refreshing Water.', 'Italian Grilled Bagel', 'Steamed Vegetables', 'Water', 300.00, 10.00, 'Evening', 50),
 (3, 'Morning Energy Boost Combo', 'Start your day with energy! Our Morning Energy Boost Combo includes Pancake, Egg Toast, and a refreshing Coke.', 'Breakfast Wrap', 'Crisscut Fries', 'Chocolate Cream Frappuccino', 200.00, 10.00, 'Morning', 50),
 (4, 'Evening Delight Combo', 'Experience an evening delight with our Grilled Chicken Wrap, served with crispy French Fries and a delightful Mocha Frappe.', 'Grilled Chicken Wrap', 'French Fries', 'Mocha Frappe', 280.00, 10.00, 'Evening', 50),
-(0, 'Aprils Specials', 'Enjoy the specials', 'Meatball Pasta', 'Crisscut Fries', 'Iced Chocolate', 199.00, 10.00, 'Morning', 20);
+(5, 'Aprils Specials', 'Enjoy the specials', 'Meatball Pasta', 'Crisscut Fries', 'Iced Chocolate', 199.00, 10.00, 'Morning', 20);
 
 -- --------------------------------------------------------
 
@@ -79,7 +79,7 @@ CREATE TABLE `menu_items` (
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `stock_quantity` int NOT NULL,
   `image` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `menu_items`
@@ -113,7 +113,7 @@ CREATE TABLE `orders` (
   `discount_amount` decimal(10,2) NOT NULL,
   `quantity` int NOT NULL,
   `customer_address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `orders`
@@ -145,7 +145,7 @@ CREATE TABLE `specials` (
   `price` decimal(8,2) NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `specials`
@@ -172,7 +172,7 @@ CREATE TABLE `users` (
   `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `phone` int NOT NULL,
   `profile_photo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `users`
