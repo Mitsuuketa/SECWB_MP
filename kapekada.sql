@@ -6,6 +6,8 @@
 -- Generation Time: Jun 14, 2024 at 09:11 AM
 -- Server version: 8.0.34
 -- PHP Version: 8.2.12
+CREATE DATABASE IF NOT EXISTS `kapekada`;
+USE `kapekada`;
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
