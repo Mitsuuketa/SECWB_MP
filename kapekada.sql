@@ -63,7 +63,7 @@ CREATE TABLE `login_attempts` (
   `email` varchar(50) NOT NULL,
   `attempt_count` int NOT NULL,
   `last_attempt_time` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
