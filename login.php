@@ -4,28 +4,6 @@ session_start();
 
 // Include database connection
 include 'db_connection.php';
-include 'session_config.php';
-// Check if there are items stored in the cookie
-if (isset($_COOKIE['cart_data'])) {
-    // Retrieve cart data from the cookie and unserialize it
-    $cookieCartData = unserialize($_COOKIE['cart_data']);
-    // Merge the cart data from the cookie with the session cart data
-    $_SESSION['cart'] = array_merge($_SESSION['cart'], $cookieCartData);
-    // Remove the cookie
-    setcookie('cart_data', '', time() - 3600, "/"); // Set the expiration time to the past to delete the cookie
-}
-
-// If user is already logged in, redirect to appropriate page
-if (isset($_SESSION['email']) && isset($_SESSION['role'])) {
-    if ($_SESSION['role'] == 'Administrator') {
-        header("Location: admin.php");
-        exit();
-    } else if ($_SESSION['role'] == 'User') {
-        header("Location: index.php");
-        exit();
-    }
-}
-
 include 'navbar.php';
 
 $message = ""; // Initialize the message variable
@@ -74,6 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['fullname'] = $user['fullname'];
                 $_SESSION['role'] = 'Administrator';
+                $_SESSION['user_id'] = $user['id']; // Add user_id to session
                 // Redirect to admin.php after 2 seconds
                 echo '<meta http-equiv="refresh" content="2;url=admin.php">';
             } else {
@@ -90,6 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['fullname'] = $user['fullname'];
                 $_SESSION['role'] = 'User';
+                $_SESSION['user_id'] = $user['id']; // Add user_id to session
                 // Redirect to index.php after 2 seconds
                 echo '<meta http-equiv="refresh" content="2;url=index.php">';
             } else {
@@ -122,7 +102,6 @@ function resetLoginAttempts($email) {
     $resetStmt->execute();
 }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">

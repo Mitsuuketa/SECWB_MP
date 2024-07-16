@@ -1,6 +1,6 @@
 <?php
 
-session_start(); // Start the session
+
 
 // Include database connection
 include 'db_connection.php';
@@ -116,8 +116,6 @@ include 'db_connection.php';
                         <?php echo $_SESSION['fullname']; ?>
                     </a>
                     <div class="dropdown-menu dropdown-menu-login" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="profile.php">Profile</a>
-                        <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="wallet.php">Wallet</a>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="logout.php">Logout</a>

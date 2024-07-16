@@ -1,14 +1,13 @@
 <?php
 // session_config.php
 
-// Start or resume the session
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
 // Configure session settings
 if (!isset($_SESSION['initiated'])) {
-    ini_set('session.sid_length', 32); // Adjusted to a valid value within the allowed range
+    ini_set('session.sid_length', 32);
     ini_set('session.entropy_length', 16);
     ini_set('session.hash_function', 'sha256');
     ini_set('session.cookie_secure', 1); // Only send the cookie over HTTPS
@@ -26,4 +25,3 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) >
     session_regenerate_id(true);
 }
 $_SESSION['LAST_ACTIVITY'] = time();
-?>
