@@ -3,9 +3,10 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 14, 2024 at 09:11 AM
--- Server version: 8.0.34
+-- Generation Time: Jul 16, 2024 at 05:34 AM
+-- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
+
 CREATE DATABASE IF NOT EXISTS `kapekada`;
 USE `kapekada`;
 
@@ -30,16 +31,16 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `combo_meals` (
-  `id` int NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `main_dish` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `side_dish` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `drink` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `main_dish` varchar(255) NOT NULL,
+  `side_dish` varchar(255) NOT NULL,
+  `drink` varchar(255) NOT NULL,
   `price` decimal(10,2) NOT NULL,
   `discount_percentage` decimal(5,2) NOT NULL,
-  `category` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `quantity` int NOT NULL
+  `category` varchar(50) NOT NULL,
+  `quantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -61,9 +62,16 @@ INSERT INTO `combo_meals` (`id`, `name`, `description`, `main_dish`, `side_dish`
 
 CREATE TABLE `login_attempts` (
   `email` varchar(50) NOT NULL,
-  `attempt_count` int NOT NULL,
+  `attempt_count` int(11) NOT NULL,
   `last_attempt_time` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `login_attempts`
+--
+
+INSERT INTO `login_attempts` (`email`, `attempt_count`, `last_attempt_time`) VALUES
+('juan@gmail.com', 1, '2024-07-15 22:51:28');
 
 -- --------------------------------------------------------
 
@@ -72,13 +80,13 @@ CREATE TABLE `login_attempts` (
 --
 
 CREATE TABLE `menu_items` (
-  `id` int NOT NULL,
-  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `category` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `category` varchar(50) NOT NULL,
   `price` decimal(10,2) NOT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `stock_quantity` int NOT NULL,
-  `image` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+  `description` text DEFAULT NULL,
+  `stock_quantity` int(11) NOT NULL,
+  `image` varchar(60) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -106,13 +114,13 @@ INSERT INTO `menu_items` (`id`, `name`, `category`, `price`, `description`, `sto
 --
 
 CREATE TABLE `orders` (
-  `id` int NOT NULL,
-  `user_id` int NOT NULL,
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
   `order_date` datetime NOT NULL,
   `total_price` decimal(10,2) NOT NULL,
   `discount_amount` decimal(10,2) NOT NULL,
-  `quantity` int NOT NULL,
-  `customer_address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+  `quantity` int(11) NOT NULL,
+  `customer_address` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -139,9 +147,9 @@ INSERT INTO `orders` (`id`, `user_id`, `order_date`, `total_price`, `discount_am
 --
 
 CREATE TABLE `specials` (
-  `id` int NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text NOT NULL,
   `price` decimal(8,2) NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL
@@ -163,28 +171,30 @@ INSERT INTO `specials` (`id`, `name`, `description`, `price`, `start_date`, `end
 --
 
 CREATE TABLE `users` (
-  `id` int NOT NULL,
-  `fullname` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `role` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `wallet` decimal(10,2) DEFAULT '0.00',
-  `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `phone` int NOT NULL,
-  `profile_photo` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+  `id` int(11) NOT NULL,
+  `fullname` varchar(255) NOT NULL,
+  `description` varchar(1000) DEFAULT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` varchar(255) NOT NULL,
+  `wallet` decimal(10,2) DEFAULT 0.00,
+  `address` varchar(255) DEFAULT NULL,
+  `phone` int(11) NOT NULL,
+  `profile_photo` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `fullname`, `email`, `password`, `role`, `wallet`, `address`, `phone`, `profile_photo`) VALUES
-(3, 'itprog', 'itprog@gmail.com', '$2y$10$ynNIJ2WkeYGA5TZF5mUyVux47XAr/cdjnVwr0ze.U.g3.hbIPrBmm', 'User', 18710.00, 'DLSU', 0, ''),
-(4, 'Administrator', 'admin@example.com', 'admin', 'Administrator', 500.00, '123 Admin Street', 0, ''),
-(5, 'hello', 'hello@gmail.com', '$2y$10$WpkQRu6uHxpxd9x3nK8J5uRwischimzZJewMUB8GigPJJDxqDFBy.', 'User', 99420.00, 'DLSU', 0, ''),
-(6, 'DLSU', 'dlsu@gmail.com', '$2y$10$1HcxIQl9lsNCIyg7QbeodONG8fHdEavMA2ca/S8q5iIFxfFTdebce', 'User', 20000.00, 'dqdq', 0, ''),
-(103, 'hello', 'hello@gmail.com', '$2y$10$X.sTDHfriiFLhc2JKmBmzOH6V.t7pNa.DUBaIRY7I.I6PmehYwDzy', 'User', 99999419.99, '231 STREET', 0, ''),
-(110, 'Juan Tamad', 'juan@gmail.com', '$2y$10$prWtnBtHVWQ5qWLcA8XRBeMpLljS/SeLheD0R7bMpTKOoKoBmlDu.', 'User', 100.00, 'Juan City', 1231231231, 'uploads/666be6226462c_logo.png');
+INSERT INTO `users` (`id`, `fullname`, `description`, `email`, `password`, `role`, `wallet`, `address`, `phone`, `profile_photo`) VALUES
+(3, 'itprog', NULL, 'itprog@gmail.com', '$2y$10$ynNIJ2WkeYGA5TZF5mUyVux47XAr/cdjnVwr0ze.U.g3.hbIPrBmm', 'User', 18710.00, 'DLSU', 0, ''),
+(4, 'Administrator', NULL, 'admin@example.com', 'admin', 'Administrator', 500.00, '123 Admin Street', 0, ''),
+(5, 'hello', NULL, 'hello@gmail.com', '$2y$10$WpkQRu6uHxpxd9x3nK8J5uRwischimzZJewMUB8GigPJJDxqDFBy.', 'User', 99420.00, 'DLSU', 0, ''),
+(6, 'DLSU', NULL, 'dlsu@gmail.com', '$2y$10$1HcxIQl9lsNCIyg7QbeodONG8fHdEavMA2ca/S8q5iIFxfFTdebce', 'User', 20000.00, 'dqdq', 0, ''),
+(103, 'hello', NULL, 'hello@gmail.com', '$2y$10$X.sTDHfriiFLhc2JKmBmzOH6V.t7pNa.DUBaIRY7I.I6PmehYwDzy', 'User', 99999419.99, '231 STREET', 0, ''),
+(110, 'Juan Tamad', NULL, 'juan@gmail.com', '$2y$10$prWtnBtHVWQ5qWLcA8XRBeMpLljS/SeLheD0R7bMpTKOoKoBmlDu.', 'User', 100.00, 'Juan City', 1231231231, 'uploads/666be6226462c_logo.png'),
+(556, 'Ben Tambling', 'baby love 123', 'ben123@gmail.com', '$2y$10$OPG7r0LTAJfVyCKpFnjm.eXjew3AnWWRPmGcChr/oNBv17Fhx.jkC', 'User', 10000.00, 'iLoveBenTambling123!', 2147483647, 'uploads/6695382f67faa_logo.png');
 
 --
 -- Indexes for dumped tables
@@ -222,25 +232,25 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `menu_items`
 --
 ALTER TABLE `menu_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `specials`
 --
 ALTER TABLE `specials`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=111;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=557;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
