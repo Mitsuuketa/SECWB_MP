@@ -1,17 +1,76 @@
 <?php 
-session_start(); // Start the session
+
+putenv('DEBUG=true'); // Enable debug mode
+
+require 'logger.php';
+require 'error_handling.php';
+
+function authenticate_user($username, $password) {
+    try {
+        // Dummy authentication logic
+        if ($username === 'admin' && $password === 'secret') {
+            log_authentication($username, true);
+            return true;
+        } else {
+            log_authentication($username, false);
+            return false;
+        }
+    } catch (Exception $e) {
+        echo handle_error($e);
+    }
+}
+
+function perform_transaction($transaction_id) {
+    try {
+        log_transaction($transaction_id, 'started');
+        // Transaction processing...
+        log_transaction($transaction_id, 'completed');
+        // Uncomment the next line to simulate an error after logging 'completed'
+        // throw new Exception("Simulated transaction error");
+    } catch (Exception $e) {
+        echo handle_error($e);
+    }
+}
+
+function admin_action($action, $admin_user) {
+    try {
+        log_admin_action($action, $admin_user);
+    } catch (Exception $e) {
+        echo handle_error($e);
+    }
+}
+
+// Example usage in a web application
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'];
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $transaction_id = $_POST['transaction_id'] ?? '';
+    $admin_user = $_POST['admin_user'] ?? '';
+
+    switch ($action) {
+        case 'authenticate':
+            authenticate_user($username, $password);
+            break;
+        case 'transaction':
+            perform_transaction($transaction_id);
+            break;
+        case 'admin':
+            admin_action($action, $admin_user);
+            break;
+        default:
+            echo "Unknown action";
+    }
+}
 
 // Include database connection
 include 'db_connection.php';
 include 'navbar.php';
+include 'session_config.php';
 
 // Fetch specials from the database
 $sql = "SELECT * FROM specials";
 $result = mysqli_query($conn, $sql);
-
-// Fetch reviews from the database
-$reviews_sql = "SELECT r.*, u.fullname FROM reviews r JOIN users u ON r.user_id = u.id WHERE r.special_id = ?";
-$stmt = $conn->prepare($reviews_sql);
 
 // Check if there are any specials
 if (mysqli_num_rows($result) > 0) {
@@ -161,9 +220,7 @@ if (mysqli_num_rows($result) > 0) {
             z-index: 1;
         }
 
-        .banner-btn:hover { background: var(--eerie-black); }
-        
-        .about-section {
+        .banner-btn:hover { background: var(--eerie-black); }.about-section {
             background-color: #F9F5F1; /* Light beige background */
             padding: 60px 0;
         }
@@ -206,80 +263,11 @@ if (mysqli_num_rows($result) > 0) {
     // Loop through each promotion and display it
     while ($row = mysqli_fetch_assoc($result)) {
     ?>
-    <div class="promotion-item">
+    <div class="promotion-item" onclick="window.location.href='specials_details.php?id=<?php echo $row['id']; ?>';">
         <h2 class="promotion-title"><?php echo $row['name']; ?></h2>
         <p class="promotion-price">₱<?php echo number_format($row['price'], 2); ?></p>
         <p class="promotion-description"><?php echo $row['description']; ?></p>
         <p class="promotion-duration">Duration: <?php echo $row['start_date']; ?> to <?php echo $row['end_date']; ?></p>
-        
-        <!-- Review Section -->
-        <div class="reviews-section">
-            <h3>Reviews</h3>
-            <?php
-            $stmt->bind_param('i', $row['id']);
-            $stmt->execute();
-            $reviews_result = $stmt->get_result();
-
-            if (mysqli_num_rows($reviews_result) > 0) {
-                while ($review = mysqli_fetch_assoc($reviews_result)) {
-                    ?>
-                    <div class="review">
-                        <h4><?php echo $review['fullname']; ?></h4>
-                        <p>Rating: <?php echo $review['rating']; ?>/5</p>
-                        <p><?php echo $review['comment']; ?></p>
-                        <?php if ($review['user_id'] == $_SESSION['user_id']) { ?>
-                            <!-- Edit Form -->
-                            <form action="edit_review.php" method="post">
-                                <input type="hidden" name="review_id" value="<?php echo $review['id']; ?>">
-                                <div class="form-group">
-                                    <label for="rating">Rating:</label>
-                                    <select name="rating" id="rating" class="form-control" required>
-                                        <option value="1" <?php echo ($review['rating'] == 1) ? 'selected' : ''; ?>>1</option>
-                                        <option value="2" <?php echo ($review['rating'] == 2) ? 'selected' : ''; ?>>2</option>
-                                        <option value="3" <?php echo ($review['rating'] == 3) ? 'selected' : ''; ?>>3</option>
-                                        <option value="4" <?php echo ($review['rating'] == 4) ? 'selected' : ''; ?>>4</option>
-                                        <option value="5" <?php echo ($review['rating'] == 5) ? 'selected' : ''; ?>>5</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="comment">Comment:</label>
-                                    <textarea name="comment" id="comment" class="form-control" rows="3" required><?php echo $review['comment']; ?></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Update Review</button>
-                            </form>
-                        <?php } ?>
-                    </div>
-                    <?php
-                }
-            } else {
-                echo "<p>No reviews yet. Be the first to review!</p>";
-            }
-            ?>
-
-            <!-- Review Form -->
-            <?php if (isset($_SESSION['user_id'])) { ?>
-            <form action="post_review.php" method="post">
-                <input type="hidden" name="special_id" value="<?php echo $row['id']; ?>">
-                <div class="form-group">
-                    <label for="rating">Rating:</label>
-                    <select name="rating" id="rating" class="form-control" required>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="comment">Comment:</label>
-                    <textarea name="comment" id="comment" class="form-control" rows="3" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Post Review</button>
-            </form>
-            <?php } else { ?>
-            <p><a href="login.php">Log in</a> to post a review.</p>
-            <?php } ?>
-        </div>
     </div>
     <?php
     }

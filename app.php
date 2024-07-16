@@ -40,5 +40,5 @@ function admin_action($action, $admin_user) {
 // Example usage
 authenticate_user('admin', 'secret');
 authenticate_user('user', 'wrongpassword');
-perform_transaction(12345);
+perform_transaction(12);
 admin_action('delete_user', 'admin');

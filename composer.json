@@ -1,0 +1,17 @@
+{
+    "name": "mikae/secwb_mp",
+    "autoload": {
+        "psr-4": {
+            "Mikae\\SecwbMp\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "mikael-marianoo",
+            "email": "95680019+mikael-marianoo@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "monolog/monolog": "^2.9"
+    }
+}
