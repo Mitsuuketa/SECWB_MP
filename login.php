@@ -28,6 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // If the last attempt was within the last hour and attempts exceed threshold, lock the account
         if ($timeDifference < 3600 && $attemptData['attempt_count'] >= 5) {
             $message = "Your account has been temporarily locked due to multiple failed login attempts. Please try again later.";
+            logAction('Account Locked', "Email: $email - Multiple failed login attempts.");
             exit; // Exit script to prevent further login attempts
         }
     }
@@ -53,11 +54,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['fullname'] = $user['fullname'];
                 $_SESSION['role'] = 'Administrator';
                 $_SESSION['user_id'] = $user['id']; // Add user_id to session
+                // Log successful login
+                logAction('Login Successful', "Email: $email - Role: Administrator");
                 // Redirect to admin.php after 2 seconds
                 echo '<meta http-equiv="refresh" content="2;url=admin.php">';
             } else {
                 handleFailedLogin($email);
                 $message = "Incorrect password. Please try again.";
+                logAction('Login Failed', "Email: $email - Incorrect password for Administrator.");
             }
         } else {
             // Verify password using password_verify for regular users
@@ -70,15 +74,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['fullname'] = $user['fullname'];
                 $_SESSION['role'] = 'User';
                 $_SESSION['user_id'] = $user['id']; // Add user_id to session
+                // Log successful login
+                logAction('Login Successful', "Email: $email - Role: User");
                 // Redirect to index.php after 2 seconds
                 echo '<meta http-equiv="refresh" content="2;url=index.php">';
             } else {
                 handleFailedLogin($email);
                 $message = "Incorrect password. Please try again.";
+                logAction('Login Failed', "Email: $email - Incorrect password for User.");
             }
         }
     } else {
         $message = "No user found with this email. Please sign up.";
+        logAction('Login Failed', "Email: $email - No user found.");
     }
 }
 
@@ -100,6 +108,32 @@ function resetLoginAttempts($email) {
     $resetStmt = $conn->prepare($resetSql);
     $resetStmt->bind_param("s", $email);
     $resetStmt->execute();
+}
+
+// Function to log actions to admin
+// Function to log actions to admin
+function logAction($action, $details) {
+    $logFile = 'C:/xampp/htdocs/SECWB_MP/app.log';
+    $timestamp = date('[Y-m-d H:i:s]');
+
+    $logMessage = "$timestamp [$action] $details" . PHP_EOL;
+
+    // Check if the directory is writable
+    if (!is_writable(dirname($logFile))) {
+        error_log("Directory is not writable: " . dirname($logFile));
+        return;
+    }
+
+    // Check if the file exists and is writable
+    if (file_exists($logFile) && !is_writable($logFile)) {
+        error_log("File is not writable: " . $logFile);
+        return;
+    }
+
+    // Attempt to write to the log file
+    if (file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX) === false) {
+        error_log("Failed to write to log file: " . $logFile);
+    }
 }
 ?>
 

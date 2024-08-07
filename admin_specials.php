@@ -8,6 +8,30 @@ include 'db_connection.php';
 
 $message = ""; // Initialize the message variable
 
+function logAction($action, $details) {
+    $logFile = 'C:/xampp/htdocs/SECWB_MP/app.log';
+    $timestamp = date('[Y-m-d H:i:s]');
+
+    $logMessage = "$timestamp [$action] $details" . PHP_EOL;
+
+    if (!is_writable(dirname($logFile))) {
+        error_log("Directory is not writable: " . dirname($logFile));
+        return;
+    }
+
+    if (file_exists($logFile) && !is_writable($logFile)) {
+        error_log("File is not writable: " . $logFile);
+        return;
+    }
+
+    if (file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX) === false) {
+        error_log("Failed to write to log file: " . $logFile);
+    }
+}
+
+// Log access to the specials page
+logAction('Access', 'Admin accessed the specials page');
+
 // Check if form for creating specials is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_specials'])) {
     // Check if the $_POST keys are set before accessing them
@@ -30,6 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_specials'])) {
             $message = "Specials created successfully.";
             // Refresh after 2 seconds
             echo '<meta http-equiv="refresh" content="2;url=admin_specials.php">';
+            logAction('Create', "Admin created a special item: $specialName with price $specialPrice");
         } else {
             $message = "Error: " . $sql . "<br>" . mysqli_error($conn);
         }
@@ -45,6 +70,7 @@ if(isset($_POST['delete_id'])) {
         $message = "Specials successfully deleted.";
         // Refresh after 2 seconds
         echo '<meta http-equiv="refresh" content="2;url=admin_specials.php">';
+        logAction('Delete', "Admin deleted special item ID: $specialId");
     } else {
         $message = "Error deleting specials: " . mysqli_error($conn);
     }
