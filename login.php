@@ -1,10 +1,14 @@
 <?php
+putenv('DEBUG=true'); // Set debug mode as needed
+
 include 'session_config.php';
+include 'error_handling.php'; // Include the error handling script
 session_start();
 
 // Include database connection
 include 'db_connection.php';
 include 'navbar.php';
+
 
 $message = ""; // Initialize the message variable
 
@@ -12,81 +16,91 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Check if there's an existing login attempt tracking record for this email
-    $attemptSql = "SELECT * FROM login_attempts WHERE email=?";
-    $attemptStmt = $conn->prepare($attemptSql);
-    $attemptStmt->bind_param("s", $email);
-    $attemptStmt->execute();
-    $attemptResult = $attemptStmt->get_result();
-
-    if ($attemptResult && $attemptResult->num_rows > 0) {
-        $attemptData = $attemptResult->fetch_assoc();
-        $lastAttemptTime = strtotime($attemptData['last_attempt_time']);
-        $currentTime = time();
-        $timeDifference = $currentTime - $lastAttemptTime;
-
-        // If the last attempt was within the last hour and attempts exceed threshold, lock the account
-        if ($timeDifference < 3600 && $attemptData['attempt_count'] >= 5) {
-            $message = "Your account has been temporarily locked due to multiple failed login attempts. Please try again later.";
-            logAction('Account Locked', "Email: $email - Multiple failed login attempts.");
-            exit; // Exit script to prevent further login attempts
+    try {
+        // Check if there's an existing login attempt tracking record for this email
+        $attemptSql = "SELECT * FROM login_attempts WHERE email=?";
+        $attemptStmt = $conn->prepare($attemptSql);
+        if (!$attemptStmt) {
+            throw new Exception("Failed to prepare statement: " . $conn->error);
         }
-    }
+        $attemptStmt->bind_param("s", $email);
+        $attemptStmt->execute();
+        $attemptResult = $attemptStmt->get_result();
 
-    // Query to fetch user data based on email
-    $sql = "SELECT * FROM users WHERE email=?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+        if ($attemptResult && $attemptResult->num_rows > 0) {
+            $attemptData = $attemptResult->fetch_assoc();
+            $lastAttemptTime = strtotime($attemptData['last_attempt_time']);
+            $currentTime = time();
+            $timeDifference = $currentTime - $lastAttemptTime;
 
-    if ($result && $result->num_rows > 0) {
-        $user = $result->fetch_assoc();
-        // Verify password
-        if ($user['role'] == 'Administrator') {
-            // Verify plain password for administrator
-            if ($password == $user['password']) {
-                // Reset login attempts if successful login
-                resetLoginAttempts($email);
-                $message = "Welcome back, " . $user['fullname'] . "! You are logged in as an Administrator. Redirecting...";
-                // Set session variables after successful login
-                $_SESSION['email'] = $user['email'];
-                $_SESSION['fullname'] = $user['fullname'];
-                $_SESSION['role'] = 'Administrator';
-                $_SESSION['user_id'] = $user['id']; // Add user_id to session
-                // Log successful login
-                logAction('Login Successful', "Email: $email - Role: Administrator");
-                // Redirect to admin.php after 2 seconds
-                echo '<meta http-equiv="refresh" content="2;url=admin.php">';
+            // If the last attempt was within the last hour and attempts exceed threshold, lock the account
+            if ($timeDifference < 3600 && $attemptData['attempt_count'] >= 5) {
+                $message = "Your account has been temporarily locked due to multiple failed login attempts. Please try again later.";
+                logAction('Account Locked', "Email: $email - Multiple failed login attempts.");
+                exit; // Exit script to prevent further login attempts
+            }
+        }
+
+        // Query to fetch user data based on email
+        $sql = "SELECT * FROM users WHERE email=?";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Failed to prepare statement: " . $conn->error);
+        }
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result && $result->num_rows > 0) {
+            $user = $result->fetch_assoc();
+            // Verify password
+            if ($user['role'] == 'Administrator') {
+                // Verify plain password for administrator
+                if ($password == $user['password']) {
+                    // Reset login attempts if successful login
+                    resetLoginAttempts($email);
+                    $message = "Welcome back, " . $user['fullname'] . "! You are logged in as an Administrator. Redirecting...";
+                    // Set session variables after successful login
+                    $_SESSION['email'] = $user['email'];
+                    $_SESSION['fullname'] = $user['fullname'];
+                    $_SESSION['role'] = 'Administrator';
+                    $_SESSION['user_id'] = $user['id']; // Add user_id to session
+                    // Log successful login
+                    logAction('Login Successful', "Email: $email - Role: Administrator");
+                    // Redirect to admin.php after 2 seconds
+                    echo '<meta http-equiv="refresh" content="2;url=admin.php">';
+                } else {
+                    handleFailedLogin($email);
+                    $message = "Incorrect password. Please try again.";
+                    logAction('Login Failed', "Email: $email - Incorrect password for Administrator.");
+                }
             } else {
-                handleFailedLogin($email);
-                $message = "Incorrect password. Please try again.";
-                logAction('Login Failed', "Email: $email - Incorrect password for Administrator.");
+                // Verify password using password_verify for regular users
+                if (password_verify($password, $user['password'])) {
+                    // Reset login attempts if successful login
+                    resetLoginAttempts($email);
+                    $message = "Welcome back, " . $user['fullname'] . "! You are logged in as a User. Redirecting...";
+                    // Set session variables after successful login
+                    $_SESSION['email'] = $user['email'];
+                    $_SESSION['fullname'] = $user['fullname'];
+                    $_SESSION['role'] = 'User';
+                    $_SESSION['user_id'] = $user['id']; // Add user_id to session
+                    // Log successful login
+                    logAction('Login Successful', "Email: $email - Role: User");
+                    // Redirect to index.php after 2 seconds
+                    echo '<meta http-equiv="refresh" content="2;url=index.php">';
+                } else {
+                    handleFailedLogin($email);
+                    $message = "Incorrect password. Please try again.";
+                    logAction('Login Failed', "Email: $email - Incorrect password for User.");
+                }
             }
         } else {
-            // Verify password using password_verify for regular users
-            if (password_verify($password, $user['password'])) {
-                // Reset login attempts if successful login
-                resetLoginAttempts($email);
-                $message = "Welcome back, " . $user['fullname'] . "! You are logged in as a User. Redirecting...";
-                // Set session variables after successful login
-                $_SESSION['email'] = $user['email'];
-                $_SESSION['fullname'] = $user['fullname'];
-                $_SESSION['role'] = 'User';
-                $_SESSION['user_id'] = $user['id']; // Add user_id to session
-                // Log successful login
-                logAction('Login Successful', "Email: $email - Role: User");
-                // Redirect to index.php after 2 seconds
-                echo '<meta http-equiv="refresh" content="2;url=index.php">';
-            } else {
-                handleFailedLogin($email);
-                $message = "Incorrect password. Please try again.";
-                logAction('Login Failed', "Email: $email - Incorrect password for User.");
-            }
+            $message = "No user found with this email. Please sign up.";
+            logAction('Login Failed', "Email: $email - No user found.");
         }
-    } else {
-        $message = "No user found with this email. Please sign up.";
-        logAction('Login Failed', "Email: $email - No user found.");
+    } catch (Exception $e) {
+        echo handle_error($e); // Display detailed error message or generic message based on debug mode
     }
 }
 
@@ -110,7 +124,6 @@ function resetLoginAttempts($email) {
     $resetStmt->execute();
 }
 
-// Function to log actions to admin
 // Function to log actions to admin
 function logAction($action, $details) {
     $logFile = 'C:/xampp/htdocs/SECWB_MP/app.log';
