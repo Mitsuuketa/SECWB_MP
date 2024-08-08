@@ -1,5 +1,5 @@
 <?php 
-
+session_start();
 putenv('DEBUG=true'); // Enable debug mode
 
 require 'logger.php';
