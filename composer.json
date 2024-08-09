@@ -12,6 +12,6 @@
         }
     ],
     "require": {
-        "monolog/monolog": "^2.9"
+        "monolog/monolog": "^3.7"
     }
 }
