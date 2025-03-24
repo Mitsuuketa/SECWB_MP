@@ -1,4 +1,7 @@
+
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 putenv('DEBUG=true'); // Set debug mode as needed
 
 include 'session_config.php';
@@ -8,7 +11,7 @@ session_start();
 // Include database connection
 include 'db_connection.php';
 include 'navbar.php';
-
+require 'vendor/autoload.php';
 
 $message = ""; // Initialize the message variable
 
@@ -54,46 +57,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($result && $result->num_rows > 0) {
             $user = $result->fetch_assoc();
             // Verify password
-            if ($user['role'] == 'Administrator') {
-                // Verify plain password for administrator
-                if ($password == $user['password']) {
-                    // Reset login attempts if successful login
-                    resetLoginAttempts($email);
-                    $message = "Welcome back, " . $user['fullname'] . "! You are logged in as an Administrator. Redirecting...";
-                    // Set session variables after successful login
-                    $_SESSION['email'] = $user['email'];
-                    $_SESSION['fullname'] = $user['fullname'];
-                    $_SESSION['role'] = 'Administrator';
-                    $_SESSION['user_id'] = $user['id']; // Add user_id to session
-                    // Log successful login
-                    logAction('Login Successful', "Email: $email - Role: Administrator");
-                    // Redirect to admin.php after 2 seconds
-                    echo '<meta http-equiv="refresh" content="2;url=admin.php">';
-                } else {
-                    handleFailedLogin($email);
-                    $message = "Incorrect password. Please try again.";
-                    logAction('Login Failed', "Email: $email - Incorrect password for Administrator.");
+            if (($user['role'] == 'Administrator' && $password == $user['password']) ||
+                ($user['role'] != 'Administrator' && password_verify($password, $user['password']))) {
+                
+                // Generate MFA Token
+                $mfa_token = bin2hex(random_bytes(32));
+                $expires_at = date('Y-m-d H:i:s', strtotime('+10 minutes'));
+        
+                // Store MFA Token in Database
+                $mfaSql = "INSERT INTO mfa_tokens (user_id, token, expires_at) VALUES (?, ?, ?)";
+                $mfaStmt = $conn->prepare($mfaSql);
+                $mfaStmt->bind_param("iss", $user['id'], $mfa_token, $expires_at);
+                $mfaStmt->execute();
+        
+                // Create MFA Verification Link
+                $mfa_link = "https://yourdomain.com/verify_mfa.php?token=$mfa_token";
+        
+                // Send MFA Email Using PHPMailer
+                $mail = new PHPMailer(true);
+        
+                try {
+                    // SMTP Configuration
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com'; // e.g., smtp.gmail.com
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'canedyken@gmail.com'; // Your email
+                    $mail->Password = '123456';   // Your email password
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; 
+                    $mail->Port = 587; // Usually 587 for TLS
+        
+                    // Email Headers
+                    $mail->setFrom('no-reply@yourdomain.com', 'Your Website');
+                    $mail->addAddress($user['email']); // Recipient
+                    $mail->Subject = 'Your Multi-Factor Authentication Link';
+                    $mail->Body = "Click the following link to complete your login: $mfa_link";
+        
+                    // Send Email
+                    $mail->send();
+                    echo "An authentication link has been sent to your email. Please check your inbox.";
+                } catch (Exception $e) {
+                    echo "Email sending failed. Error: {$mail->ErrorInfo}";
                 }
+        
+                exit;
             } else {
-                // Verify password using password_verify for regular users
-                if (password_verify($password, $user['password'])) {
-                    // Reset login attempts if successful login
-                    resetLoginAttempts($email);
-                    $message = "Welcome back, " . $user['fullname'] . "! You are logged in as a User. Redirecting...";
-                    // Set session variables after successful login
-                    $_SESSION['email'] = $user['email'];
-                    $_SESSION['fullname'] = $user['fullname'];
-                    $_SESSION['role'] = 'User';
-                    $_SESSION['user_id'] = $user['id']; // Add user_id to session
-                    // Log successful login
-                    logAction('Login Successful', "Email: $email - Role: User");
-                    // Redirect to index.php after 2 seconds
-                    echo '<meta http-equiv="refresh" content="2;url=index.php">';
-                } else {
-                    handleFailedLogin($email);
-                    $message = "Incorrect password. Please try again.";
-                    logAction('Login Failed', "Email: $email - Incorrect password for User.");
-                }
+                echo "Invalid credentials.";
             }
         } else {
             $message = "No user found with this email. Please sign up.";
