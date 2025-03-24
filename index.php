@@ -2,6 +2,7 @@
 session_start();
 putenv('DEBUG=true'); // Enable debug mode
 
+include 'session_config.php';
 require 'logger.php';
 require 'error_handling.php';
 

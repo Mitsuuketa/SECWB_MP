@@ -1,7 +1,4 @@
 <?php
-
-
-
 // Include database connection
 include 'db_connection.php';
 include 'session_config.php';

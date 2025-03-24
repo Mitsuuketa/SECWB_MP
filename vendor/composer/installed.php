@@ -3,7 +3,7 @@
         'name' => 'mikae/secwb_mp',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '00a10cedb4db1031d04b8dffd01cbfb1ad241cd6',
+        'reference' => 'd99ece940ad44042a19c09aa84776117a8a4890e',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'mikae/secwb_mp' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '00a10cedb4db1031d04b8dffd01cbfb1ad241cd6',
+            'reference' => 'd99ece940ad44042a19c09aa84776117a8a4890e',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

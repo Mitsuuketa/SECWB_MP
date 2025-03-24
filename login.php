@@ -6,6 +6,8 @@ putenv('DEBUG=true'); // Set debug mode as needed
 
 include 'session_config.php';
 include 'error_handling.php'; // Include the error handling script
+session_unset();
+session_destroy();
 session_start();
 
 // Include database connection
@@ -71,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mfaStmt->execute();
         
                 // Create MFA Verification Link
-                $mfa_link = "https://yourdomain.com/verify_mfa.php?token=$mfa_token";
+                $mfa_link = "https://localhost/verify_mfa.php?token=$mfa_token";
         
                 // Send MFA Email Using PHPMailer
                 $mail = new PHPMailer(true);
@@ -79,12 +81,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 try {
                     // SMTP Configuration
                     $mail->isSMTP();
-                    $mail->Host = 'smtp.gmail.com'; // e.g., smtp.gmail.com
+                    $mail->Host = 'sandbox.smtp.mailtrap.io';
                     $mail->SMTPAuth = true;
-                    $mail->Username = 'canedyken@gmail.com'; // Your email
-                    $mail->Password = '123456';   // Your email password
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; 
-                    $mail->Port = 587; // Usually 587 for TLS
+                    $mail->Username = '2441761b902b10';
+                    $mail->Password = '754e463b03f2ff';
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port = 2525;
         
                     // Email Headers
                     $mail->setFrom('no-reply@yourdomain.com', 'Your Website');
@@ -94,13 +96,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
                     // Send Email
                     $mail->send();
-                    echo "An authentication link has been sent to your email. Please check your inbox.";
+                    header("Location: verify_mfa.php?token=$mfa_token");
+                    exit();
+                    
                 } catch (Exception $e) {
-                    echo "Email sending failed. Error: {$mail->ErrorInfo}";
+                    error_log("Email sending failed: " . $mail->ErrorInfo);
+                    die("An error occurred while sending the MFA email.");
                 }
-        
-                exit;
             } else {
+                handleFailedLogin($email);
                 echo "Invalid credentials.";
             }
         } else {
