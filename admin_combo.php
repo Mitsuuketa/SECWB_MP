@@ -1,10 +1,17 @@
 <?php
-include 'session_config.php';
 ob_start(); // Start output buffering
 session_start(); // Start the session
+function checkAdminAccess() {
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Administrator') {
+        header("Location: index.php");
+        exit();
+    }
+}
+checkAdminAccess();
 include 'admin_navbar.php';
 // Include database connection
 include 'db_connection.php';
+include 'session_config.php';
 
 $message = ""; // Initialize the message variable
 $low_stock_threshold = 10; // Example threshold value

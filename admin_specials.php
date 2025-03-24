@@ -1,6 +1,13 @@
 <?php
-include 'session_config.php';
 session_start(); // Start the session
+function checkAdminAccess() {
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Administrator') {
+        header("Location: index.php");
+        exit();
+    }
+}
+checkAdminAccess();
+include 'session_config.php';
 include 'admin_navbar.php';
 // Include database connection
 include 'db_connection.php';

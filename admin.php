@@ -1,7 +1,17 @@
 <?php 
+session_start();
+function checkAdminAccess() {
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Administrator') {
+        header("Location: index.php");
+        exit();
+    }
+}
+checkAdminAccess();
+
+// Check if the user is logged in and has the 'Administrator' role
+include 'session_config.php';
 include 'admin_navbar.php'; 
 include 'db_connection.php';
-include 'session_config.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">

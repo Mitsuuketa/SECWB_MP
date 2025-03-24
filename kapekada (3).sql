@@ -2,13 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Jul 16, 2024 at 05:34 AM
--- Server version: 10.4.32-MariaDB
+-- Host: 127.0.0.1:3306
+-- Generation Time: Mar 24, 2025 at 03:00 PM
+-- Server version: 8.0.36
 -- PHP Version: 8.2.12
-
-CREATE DATABASE IF NOT EXISTS `kapekada`;
-USE `kapekada`;
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -31,17 +28,17 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `combo_meals` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` text NOT NULL,
-  `main_dish` varchar(255) NOT NULL,
-  `side_dish` varchar(255) NOT NULL,
-  `drink` varchar(255) NOT NULL,
+  `id` int NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci NOT NULL,
+  `main_dish` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `side_dish` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `drink` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `price` decimal(10,2) NOT NULL,
   `discount_percentage` decimal(5,2) NOT NULL,
-  `category` varchar(50) NOT NULL,
-  `quantity` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `category` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `quantity` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `combo_meals`
@@ -61,10 +58,10 @@ INSERT INTO `combo_meals` (`id`, `name`, `description`, `main_dish`, `side_dish`
 --
 
 CREATE TABLE `login_attempts` (
-  `email` varchar(50) NOT NULL,
-  `attempt_count` int(11) NOT NULL,
+  `email` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `attempt_count` int NOT NULL,
   `last_attempt_time` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `login_attempts`
@@ -80,14 +77,14 @@ INSERT INTO `login_attempts` (`email`, `attempt_count`, `last_attempt_time`) VAL
 --
 
 CREATE TABLE `menu_items` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `category` varchar(50) NOT NULL,
+  `id` int NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `category` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
   `price` decimal(10,2) NOT NULL,
-  `description` text DEFAULT NULL,
-  `stock_quantity` int(11) NOT NULL,
-  `image` varchar(60) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `description` text COLLATE utf8mb4_general_ci,
+  `stock_quantity` int NOT NULL,
+  `image` varchar(60) COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `menu_items`
@@ -110,18 +107,31 @@ INSERT INTO `menu_items` (`id`, `name`, `category`, `price`, `description`, `sto
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `mfa_tokens`
+--
+
+CREATE TABLE `mfa_tokens` (
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `orders`
 --
 
 CREATE TABLE `orders` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
   `order_date` datetime NOT NULL,
   `total_price` decimal(10,2) NOT NULL,
   `discount_amount` decimal(10,2) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `customer_address` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `quantity` int NOT NULL,
+  `customer_address` varchar(255) COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `orders`
@@ -143,17 +153,32 @@ INSERT INTO `orders` (`id`, `user_id`, `order_date`, `total_price`, `discount_am
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `reviews`
+--
+
+CREATE TABLE `reviews` (
+  `id` int NOT NULL,
+  `special_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `rating` int NOT NULL,
+  `comment` text COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `specials`
 --
 
 CREATE TABLE `specials` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` text NOT NULL,
+  `id` int NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci NOT NULL,
   `price` decimal(8,2) NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `specials`
@@ -171,17 +196,17 @@ INSERT INTO `specials` (`id`, `name`, `description`, `price`, `start_date`, `end
 --
 
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `fullname` varchar(255) NOT NULL,
-  `description` varchar(1000) DEFAULT NULL,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` varchar(255) NOT NULL,
-  `wallet` decimal(10,2) DEFAULT 0.00,
-  `address` varchar(255) DEFAULT NULL,
-  `phone` int(11) NOT NULL,
-  `profile_photo` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `id` int NOT NULL,
+  `fullname` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `role` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `wallet` decimal(10,2) DEFAULT '0.00',
+  `address` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `phone` int NOT NULL,
+  `profile_photo` varchar(100) COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
@@ -194,7 +219,8 @@ INSERT INTO `users` (`id`, `fullname`, `description`, `email`, `password`, `role
 (6, 'DLSU', NULL, 'dlsu@gmail.com', '$2y$10$1HcxIQl9lsNCIyg7QbeodONG8fHdEavMA2ca/S8q5iIFxfFTdebce', 'User', 20000.00, 'dqdq', 0, ''),
 (103, 'hello', NULL, 'hello@gmail.com', '$2y$10$X.sTDHfriiFLhc2JKmBmzOH6V.t7pNa.DUBaIRY7I.I6PmehYwDzy', 'User', 99999419.99, '231 STREET', 0, ''),
 (110, 'Juan Tamad', NULL, 'juan@gmail.com', '$2y$10$prWtnBtHVWQ5qWLcA8XRBeMpLljS/SeLheD0R7bMpTKOoKoBmlDu.', 'User', 100.00, 'Juan City', 1231231231, 'uploads/666be6226462c_logo.png'),
-(556, 'Ben Tambling', 'baby love 123', 'ben123@gmail.com', '$2y$10$OPG7r0LTAJfVyCKpFnjm.eXjew3AnWWRPmGcChr/oNBv17Fhx.jkC', 'User', 10000.00, 'iLoveBenTambling123!', 2147483647, 'uploads/6695382f67faa_logo.png');
+(556, 'Ben Tambling', 'baby love 123', 'ben123@gmail.com', '$2y$10$OPG7r0LTAJfVyCKpFnjm.eXjew3AnWWRPmGcChr/oNBv17Fhx.jkC', 'User', 10000.00, 'iLoveBenTambling123!', 2147483647, 'uploads/6695382f67faa_logo.png'),
+(557, 'TEST', 'BenTambling123!', 'anything@gmail.com', '$2y$10$8WCzudndmw125Ghme88IMOkKWvmXFyNNlK6cYxq0stIJcdUDPAFAm', 'User', 123123.00, '1231231', 1231231231, 'uploads/67e1199871228_481604506_572999205761682_1995260851222849213_n.jpg');
 
 --
 -- Indexes for dumped tables
@@ -207,10 +233,25 @@ ALTER TABLE `menu_items`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `mfa_tokens`
+--
+ALTER TABLE `mfa_tokens`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Indexes for table `orders`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `special_id` (`special_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `specials`
@@ -232,25 +273,54 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `menu_items`
 --
 ALTER TABLE `menu_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `mfa_tokens`
+--
+ALTER TABLE `mfa_tokens`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT for table `reviews`
+--
+ALTER TABLE `reviews`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `specials`
 --
 ALTER TABLE `specials`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=557;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=558;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `mfa_tokens`
+--
+ALTER TABLE `mfa_tokens`
+  ADD CONSTRAINT `mfa_tokens_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`special_id`) REFERENCES `specials` (`id`),
+  ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
